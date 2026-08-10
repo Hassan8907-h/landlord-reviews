@@ -1,289 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Maintenance Vendor Review</title>
-<style>
-  :root {
-    --ink: #14181f;
-    --ink-soft: #2a3140;
-    --paper: #eef0f3;
-    --paper-card: #f8f9fb;
-    --line: #d7dce3;
-    --amber: #c8791f;
-    --amber-deep: #a5610f;
-    --ok: #2f7a4f;
-    --error: #b8422f;
-    --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
-    --sans: "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; background: var(--paper);
-    background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
-    background-size: 28px 28px; background-position: -1px -1px;
-    font-family: var(--sans); color: var(--ink);
-    display: flex; justify-content: center; padding: 40px 16px 80px;
-  }
-  .sheet { width: 100%; max-width: 620px; }
-  .hero {
-    position: relative; background: linear-gradient(135deg, var(--ink) 0%, #1c2230 60%, var(--ink-soft) 100%);
-    border-radius: 12px; overflow: hidden; margin-bottom: 20px; padding: 30px 26px; isolation: isolate;
-  }
-  .hero h1 { font-size: 26px; color: #fff; margin: 6px 0 8px; font-weight: 700; letter-spacing: -0.01em; }
-  .hero .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #f0b06a; }
-  .hero .eyebrow::before { content: "● "; color: var(--amber); }
-  .hero p.sub { font-size: 14px; color: #b7bdc9; margin: 0; line-height: 1.5; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Review | Property Maintenance</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --error-color: #ef4444;
+            --success-color: #10b981;
+        }
 
-  .card {
-    background: var(--paper-card); border: 1px solid var(--line); border-radius: 10px;
-    box-shadow: 0 1px 0 rgba(20,24,31,0.03), 0 12px 28px -18px rgba(20,24,31,0.35); overflow: hidden;
-  }
-  .context {
-    padding: 16px 20px; border-bottom: 1px dashed var(--line); font-size: 13px; color: var(--ink-soft);
-  }
-  .context strong { color: var(--ink); }
-  .context .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-  .context .row:last-child { margin-bottom: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.1) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px 16px;
+            box-sizing: border-box;
+        }
 
-  form { padding: 22px 20px 20px; }
-  fieldset { border: none; padding: 0; margin: 0 0 20px; }
-  legend { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber-deep); margin-bottom: 12px; }
+        .container {
+            width: 100%;
+            max-width: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-  .status-options { display: flex; flex-direction: column; gap: 8px; }
-  .status-option {
-    display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 8px;
-    padding: 12px 14px; cursor: pointer; background: #fff; transition: all 0.15s ease;
-  }
-  .status-option input { accent-color: var(--amber); width: 16px; height: 16px; }
-  .status-option.selected { border-color: var(--amber); background: rgba(200,121,31,0.06); }
-  .status-option .label { font-weight: 600; font-size: 14px; }
-  .status-option .desc { font-size: 12px; color: var(--ink-soft); }
+        .card {
+            background-color: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
 
-  .field { margin-bottom: 14px; }
-  .field:last-child { margin-bottom: 0; }
-  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-  input[type="date"], input[type="time"], input[type="text"], input[type="email"], input[type="tel"] {
-    width: 100%; font-family: var(--sans); font-size: 15px; color: var(--ink); background: #fff;
-    border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px;
-  }
-  input:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(200,121,31,0.15); }
-  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 480px) { .row-2 { grid-template-columns: 1fr; } }
+        .hero-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid var(--border-color);
+        }
 
-  .conditional-section {
-    display: none; border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 16px;
-  }
-  .conditional-section.show { display: block; }
+        .header-content {
+            padding: 24px;
+        }
 
-  .submit-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    margin-top: 22px; padding-top: 18px; border-top: 1px dashed var(--line);
-  }
-  button {
-    font-family: var(--sans); font-weight: 600; font-size: 15px; color: #fff; background: var(--ink);
-    border: none; border-radius: 7px; padding: 12px 22px; cursor: pointer;
-  }
-  button:hover { background: var(--ink-soft); }
-  button:disabled { opacity: 0.55; cursor: not-allowed; }
-  .status-note { font-size: 12px; color: var(--ink-soft); font-family: var(--mono); }
+        .tag {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #f97316;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-  .result { display: none; padding: 24px 20px; }
-  .result.show { display: block; }
-  .card.hide-form form, .card.hide-form .context { display: none; }
-  .result-icon {
-    width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 20px; margin-bottom: 14px;
-  }
-  .result.ok .result-icon { background: rgba(47,122,79,0.12); color: var(--ok); }
-  .result.err .result-icon { background: rgba(184,66,47,0.12); color: var(--error); }
-  .result h2 { font-size: 19px; margin: 0 0 8px; }
-  .result p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+        .tag::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #f97316;
+            border-radius: 50%;
+        }
 
-  .missing-link {
-    padding: 30px 20px; text-align: center; color: var(--ink-soft); font-size: 14px;
-  }
-</style>
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            margin: 0;
+            font-size: 0.92rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .form-card {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        select, textarea, input[type="text"] {
+            width: 100%;
+            padding: 12px 14px;
+            background-color: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        select:focus, textarea:focus, input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            display: none;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .status-message.error {
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--error-color);
+            color: #fca5a5;
+        }
+
+        .status-message.success {
+            background-color: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success-color);
+            color: #6ee7b7;
+        }
+    </style>
 </head>
 <body>
 
-<div class="sheet">
-  <div class="hero">
-    <div class="eyebrow">Property Maintenance</div>
-    <h1>Vendor Review</h1>
-    <p class="sub">Confirm the suggested vendor, arrange an alternative, or ask for more time.</p>
-  </div>
-
-  <div class="card" id="card">
-    <div class="context" id="context"></div>
-
-    <form id="reviewForm" novalidate>
-      <fieldset>
-        <legend>Your decision</legend>
-        <div class="status-options">
-          <label class="status-option" for="status-confirmed">
-            <input type="radio" id="status-confirmed" name="vendor_status" value="Confirmed" required>
-            <div><div class="label">Confirmed</div><div class="desc">The suggested vendor works — set a visit time.</div></div>
-          </label>
-          <label class="status-option" for="status-alternative">
-            <input type="radio" id="status-alternative" name="vendor_status" value="Need Alternative">
-            <div><div class="label">Need Alternative</div><div class="desc">I'll arrange a different vendor myself.</div></div>
-          </label>
-          <label class="status-option" for="status-time">
-            <input type="radio" id="status-time" name="vendor_status" value="Need Time">
-            <div><div class="label">Need Time</div><div class="desc">I'm not ready to decide yet — remind me later.</div></div>
-          </label>
+    <div class="container">
+        <!-- Header Card with Image -->
+        <div class="card">
+            <!-- Replace image URL with your own asset if desired -->
+            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80" alt="Maintenance" class="hero-image">
+            <div class="header-content">
+                <div class="tag">Property Maintenance</div>
+                <h1>Vendor Review</h1>
+                <p class="subtitle">Confirm the suggested vendor, arrange an alternative, or request additional time for review.</p>
+            </div>
         </div>
-      </fieldset>
 
-      <div class="conditional-section" id="visitTimeSection">
-        <legend style="margin-bottom:12px;">Visit schedule</legend>
-        <div class="row-2">
-          <div class="field">
-            <label for="visit_date">Visit date</label>
-            <input type="date" id="visit_date" name="visit_date">
-          </div>
-          <div class="field">
-            <label for="visit_time">Visit time</label>
-            <input type="time" id="visit_time" name="visit_time">
-          </div>
+        <!-- Form Card -->
+        <div class="card form-card">
+            <form id="vendorForm">
+                <div class="form-group">
+                    <label for="action">Decision / Action</label>
+                    <select id="action" name="action" required>
+                        <option value="Approved">Approve Suggested Vendor</option>
+                        <option value="Alternative">Arrange Alternative Vendor</option>
+                        <option value="More Time Needed">Request More Time</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Comments / Instructions</label>
+                    <textarea id="comments" name="comments" placeholder="Add any specific instructions or notes..."></textarea>
+                </div>
+
+                <button type="submit" id="submitBtn">Submit Decision</button>
+            </form>
+
+            <div id="statusMessage" class="status-message"></div>
         </div>
-      </div>
-
-      <div class="conditional-section" id="altVendorSection">
-        <legend style="margin-bottom:12px;">Alternative vendor details</legend>
-        <div class="field">
-          <label for="alt_vendor_name">Vendor name</label>
-          <input type="text" id="alt_vendor_name" name="alt_vendor_name" placeholder="e.g. Ahmed Raza">
-        </div>
-        <div class="row-2">
-          <div class="field">
-            <label for="alt_vendor_email">Vendor email</label>
-            <input type="email" id="alt_vendor_email" name="alt_vendor_email" placeholder="vendor@example.com">
-          </div>
-          <div class="field">
-            <label for="alt_vendor_phone">Vendor phone</label>
-            <input type="tel" id="alt_vendor_phone" name="alt_vendor_phone" placeholder="+1 555 000 1234">
-          </div>
-        </div>
-      </div>
-
-      <div class="submit-row">
-        <span class="status-note" id="statusNote">&nbsp;</span>
-        <button type="submit" id="submitBtn">Submit decision</button>
-      </div>
-    </form>
-
-    <div class="result" id="result">
-      <div class="result-icon" id="resultIcon">✓</div>
-      <h2 id="resultTitle">Response submitted</h2>
-      <p id="resultBody">Thanks — the workflow will continue automatically.</p>
     </div>
-  </div>
-</div>
 
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const rawResumeUrl = params.get('resumeUrl');
-  const resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('vendorForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMessage = document.getElementById('statusMessage');
 
-  const card = document.getElementById('card');
-  const context = document.getElementById('context');
-  const form = document.getElementById('reviewForm');
-  const result = document.getElementById('result');
-  const resultIcon = document.getElementById('resultIcon');
-  const resultTitle = document.getElementById('resultTitle');
-  const resultBody = document.getElementById('resultBody');
-  const submitBtn = document.getElementById('submitBtn');
-  const statusNote = document.getElementById('statusNote');
-  const visitTimeSection = document.getElementById('visitTimeSection');
-  const altVendorSection = document.getElementById('altVendorSection');
+            const urlParams = new URLSearchParams(window.location.search);
+            let rawResumeUrl = urlParams.get('resumeUrl');
 
-  if (!resumeUrl) {
-    card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the link from your email.</div>';
-  } else {
-    // Render context block from query params
-    const fields = [
-      ['Request ID', params.get('request_id')],
-      ['Tenant', params.get('tenant_name')],
-      ['Category', params.get('category')],
-      ['Description', params.get('description')],
-      ['Suggested Vendor', params.get('suggested_vendor')]
-    ];
-    context.innerHTML = fields
-      .filter(([, v]) => v)
-      .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
-      .join('');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
 
-    // Toggle conditional sections + which fields are required based on selected status
-    form.addEventListener('change', function (e) {
-      if (e.target.name !== 'vendor_status') return;
+                if (!rawResumeUrl) {
+                    showStatus('error', 'Missing workflow link. Please access this page using the exact URL provided in your email.');
+                    return;
+                }
 
-      document.querySelectorAll('.status-option').forEach(el => el.classList.remove('selected'));
-      e.target.closest('.status-option').classList.add('selected');
+                // Decode percent-encoded characters
+                let decodedUrl = decodeURIComponent(rawResumeUrl);
+                if (decodedUrl.includes('%3A') || decodedUrl.includes('%2F')) {
+                    decodedUrl = decodeURIComponent(decodedUrl);
+                }
 
-      const status = e.target.value;
-      const showVisitTime = status === 'Confirmed' || status === 'Need Alternative';
-      const showAltVendor = status === 'Need Alternative';
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Submitting...';
 
-      visitTimeSection.classList.toggle('show', showVisitTime);
-      altVendorSection.classList.toggle('show', showAltVendor);
+                const formData = {
+                    action: document.getElementById('action').value,
+                    comments: document.getElementById('comments').value,
+                    submittedAt: new Date().toISOString()
+                };
 
-      document.getElementById('visit_date').required = showVisitTime;
-      document.getElementById('visit_time').required = showVisitTime;
-      document.getElementById('alt_vendor_name').required = showAltVendor;
-      document.getElementById('alt_vendor_email').required = showAltVendor;
-      document.getElementById('alt_vendor_phone').required = showAltVendor;
-    });
+                try {
+                    const response = await fetch(decodedUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
 
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-      }
+                    if (response.ok) {
+                        form.style.display = 'none';
+                        showStatus('success', '<strong>Thank you!</strong> Your decision has been successfully recorded.');
+                    } else {
+                        throw new Error(`Server returned status ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Submission Error:', error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'Submit Decision';
+                    showStatus('error', '<strong>Couldn\'t submit your response</strong><br>There was a problem reaching the workflow. Please check your connection or try again.');
+                }
+            });
 
-      const payload = {
-        vendor_status: form.vendor_status.value,
-        visit_date: form.visit_date.value || '',
-        visit_time: form.visit_time.value || '',
-        alt_vendor_name: form.alt_vendor_name.value ? form.alt_vendor_name.value.trim() : '',
-        alt_vendor_email: form.alt_vendor_email.value ? form.alt_vendor_email.value.trim() : '',
-        alt_vendor_phone: form.alt_vendor_phone.value ? form.alt_vendor_phone.value.trim() : ''
-      };
-
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting…";
-      statusNote.textContent = "Sending your decision…";
-
-      try {
-        const res = await fetch(resumeUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+            function showStatus(type, message) {
+                statusMessage.className = `status-message ${type}`;
+                statusMessage.innerHTML = message;
+                statusMessage.style.display = 'block';
+            }
         });
-
-        if (!res.ok) throw new Error("Request failed with status " + res.status);
-
-        card.classList.add('hide-form');
-        result.classList.add('show', 'ok');
-        resultIcon.textContent = "✓";
-        resultTitle.textContent = "Response submitted";
-        resultBody.textContent = "Thanks — the workflow will continue automatically based on your decision.";
-      } catch (err) {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Submit decision";
-        statusNote.textContent = "Something went wrong — please try again.";
-        card.classList.add('hide-form');
-        result.classList.add('show', 'err');
-        resultIcon.textContent = "!";
-        resultTitle.textContent = "Couldn't submit your response";
-        resultBody.textContent = "There was a problem reaching the workflow. Please try the link again, or contact the office directly.";
-      }
-    });
-  }
-</script>
-
+    </script>
 </body>
 </html>
