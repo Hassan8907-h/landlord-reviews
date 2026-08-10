@@ -185,7 +185,8 @@
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  const resumeUrl = params.get('resumeUrl');
+  const rawResumeUrl = params.get('resumeUrl');
+  const resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
 
   const card = document.getElementById('card');
   const context = document.getElementById('context');
@@ -247,9 +248,9 @@
         vendor_status: form.vendor_status.value,
         visit_date: form.visit_date.value || '',
         visit_time: form.visit_time.value || '',
-        alt_vendor_name: form.alt_vendor_name.value.trim(),
-        alt_vendor_email: form.alt_vendor_email.value.trim(),
-        alt_vendor_phone: form.alt_vendor_phone.value.trim()
+        alt_vendor_name: form.alt_vendor_name.value ? form.alt_vendor_name.value.trim() : '',
+        alt_vendor_email: form.alt_vendor_email.value ? form.alt_vendor_email.value.trim() : '',
+        alt_vendor_phone: form.alt_vendor_phone.value ? form.alt_vendor_phone.value.trim() : ''
       };
 
       submitBtn.disabled = true;
