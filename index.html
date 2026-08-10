@@ -6,13 +6,12 @@
     <title>Vendor Review | Property Maintenance</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.85);
+            --bg-color: #1a1a1e;
+            --card-bg: #2b2b36;
             --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-muted: #a1a1aa;
+            --grid-color: rgba(255, 255, 255, 0.05);
             --error-color: #ef4444;
             --success-color: #10b981;
         }
@@ -20,57 +19,53 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
+            /* Box / Grid Pattern Background */
             background-image: 
-                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.1) 0px, transparent 50%);
-            background-attachment: fixed;
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 32px 32px;
             color: var(--text-main);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 24px 16px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
         .container {
             width: 100%;
-            max-width: 520px;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .card {
             background-color: var(--card-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            padding: 24px;
+            box-sizing: border-box;
             overflow: hidden;
         }
 
-        .hero-image {
-            width: 100%;
-            height: 140px;
+        /* Top Hero Image Header */
+        .card-image {
+            width: calc(100% + 48px);
+            height: 160px;
             object-fit: cover;
+            margin: -24px -24px 20px -24px;
             display: block;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-content {
-            padding: 24px;
         }
 
         .tag {
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.05em;
             color: #f97316;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -79,68 +74,57 @@
         .tag::before {
             content: "";
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background-color: #f97316;
             border-radius: 50%;
         }
 
         h1 {
             margin: 0 0 8px 0;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
         }
 
         p.subtitle {
             margin: 0;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .form-card {
-            padding: 24px;
+            line-height: 1.4;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         label {
             display: block;
             font-size: 0.85rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--text-main);
         }
 
         select, textarea, input[type="text"] {
             width: 100%;
-            padding: 12px 14px;
-            background-color: rgba(15, 23, 42, 0.6);
-            border: 1px solid var(--border-color);
+            padding: 12px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             color: #fff;
             font-size: 0.95rem;
             box-sizing: border-box;
             outline: none;
-            transition: all 0.2s ease;
-        }
-
-        select:focus, textarea:focus, input[type="text"]:focus {
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
         }
 
         textarea {
             resize: vertical;
-            min-height: 100px;
+            min-height: 90px;
         }
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             background-color: var(--accent-color);
             color: #fff;
             border: none;
@@ -148,15 +132,6 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-        }
-
-        button:hover {
-            background-color: var(--accent-hover);
-        }
-
-        button:active {
-            transform: scale(0.99);
         }
 
         button:disabled {
@@ -167,19 +142,19 @@
         .status-message {
             display: none;
             padding: 16px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 0.9rem;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .status-message.error {
-            background-color: rgba(239, 68, 68, 0.15);
+            background-color: rgba(239, 68, 68, 0.1);
             border: 1px solid var(--error-color);
             color: #fca5a5;
         }
 
         .status-message.success {
-            background-color: rgba(16, 185, 129, 0.15);
+            background-color: rgba(16, 185, 129, 0.1);
             border: 1px solid var(--success-color);
             color: #6ee7b7;
         }
@@ -188,19 +163,17 @@
 <body>
 
     <div class="container">
-        <!-- Header Card with Image -->
+        <!-- Header Card -->
         <div class="card">
-            <!-- Replace image URL with your own asset if desired -->
-            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80" alt="Maintenance" class="hero-image">
-            <div class="header-content">
-                <div class="tag">Property Maintenance</div>
-                <h1>Vendor Review</h1>
-                <p class="subtitle">Confirm the suggested vendor, arrange an alternative, or request additional time for review.</p>
-            </div>
+            <!-- Background / Header Image -->
+            <img src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=800&q=80" alt="Vendor Banner" class="card-image">
+            <div class="tag">Property Maintenance</div>
+            <h1>Vendor Review</h1>
+            <p class="subtitle">Confirm the suggested vendor, arrange an alternative, or ask for more time.</p>
         </div>
 
         <!-- Form Card -->
-        <div class="card form-card">
+        <div class="card">
             <form id="vendorForm">
                 <div class="form-group">
                     <label for="action">Decision / Action</label>
@@ -213,7 +186,7 @@
 
                 <div class="form-group">
                     <label for="comments">Comments / Instructions</label>
-                    <textarea id="comments" name="comments" placeholder="Add any specific instructions or notes..."></textarea>
+                    <textarea id="comments" name="comments" placeholder="Add any details or instructions here..."></textarea>
                 </div>
 
                 <button type="submit" id="submitBtn">Submit Decision</button>
@@ -229,6 +202,7 @@
             const submitBtn = document.getElementById('submitBtn');
             const statusMessage = document.getElementById('statusMessage');
 
+            // 1. Get raw parameter
             const urlParams = new URLSearchParams(window.location.search);
             let rawResumeUrl = urlParams.get('resumeUrl');
 
@@ -240,7 +214,7 @@
                     return;
                 }
 
-                // Decode percent-encoded characters
+                // 2. Decode %3A%2F%2F -> ://
                 let decodedUrl = decodeURIComponent(rawResumeUrl);
                 if (decodedUrl.includes('%3A') || decodedUrl.includes('%2F')) {
                     decodedUrl = decodeURIComponent(decodedUrl);
@@ -256,6 +230,7 @@
                 };
 
                 try {
+                    // 3. Post to n8n webhook/wait node
                     const response = await fetch(decodedUrl, {
                         method: 'POST',
                         headers: {
@@ -274,7 +249,7 @@
                     console.error('Submission Error:', error);
                     submitBtn.disabled = false;
                     submitBtn.innerText = 'Submit Decision';
-                    showStatus('error', '<strong>Couldn\'t submit your response</strong><br>There was a problem reaching the workflow. Please check your connection or try again.');
+                    showStatus('error', '<strong>Couldn\'t submit your response</strong><br>There was a problem reaching the workflow. Please try the link again, or contact the office directly.');
                 }
             });
 
