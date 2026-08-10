@@ -202,13 +202,22 @@
 </div>
 
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const rawResumeUrl = params.get('resumeUrl');
-  
-  let resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
-  if (resumeUrl && (resumeUrl.includes('%3A') || resumeUrl.includes('%2F'))) {
-    resumeUrl = decodeURIComponent(resumeUrl);
+  // Robust URL extraction for resumeUrl that accounts for unencoded nested parameters
+  function getResumeUrl() {
+    const rawSearch = window.location.search;
+    const match = rawSearch.match(/[?&]resumeUrl=([^&]+.*)/);
+    if (!match) return null;
+    
+    let url = decodeURIComponent(match[1]);
+    // Handle double encoding if present
+    if (url.includes('%3A') || url.includes('%2F')) {
+      url = decodeURIComponent(url);
+    }
+    return url;
   }
+
+  const resumeUrl = getResumeUrl();
+  const params = new URLSearchParams(window.location.search);
 
   const card = document.getElementById('card');
   const context = document.getElementById('context');
@@ -223,7 +232,7 @@
   const altVendorSection = document.getElementById('altVendorSection');
 
   if (!resumeUrl) {
-    card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the link from your email.</div>';
+    card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the complete link from your email or active execution.</div>';
   } else {
     const fields = [
       ['Request ID', params.get('request_id')],
@@ -297,12 +306,12 @@
         result.classList.add('show', 'ok');
         resultIcon.textContent = "✓";
         resultTitle.textContent = "Response submitted";
-        resultBody.textContent = "Thanks — the workflow will continue automatically based on your decision.";
+        resultBody.textContent = "Thanks — your choice (" + selectedStatus + ") was recorded and the workflow will continue.";
       } catch (err) {
         console.error("Submission error:", err);
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit decision";
-        statusNote.textContent = "Something went wrong — please try again.";
+        statusNote.textContent = "Error reaching n8n. Check if ngrok is active.";
       }
     });
   }
