@@ -24,7 +24,6 @@
     margin: 0; 
     min-height: 100vh; 
     background-color: var(--paper);
-    /* Hero Image overlaid with Grid Pattern Background */
     background-image: 
       linear-gradient(rgba(238, 240, 243, 0.85), rgba(238, 240, 243, 0.90)),
       linear-gradient(var(--line) 1px, transparent 1px), 
@@ -206,7 +205,6 @@
   const params = new URLSearchParams(window.location.search);
   const rawResumeUrl = params.get('resumeUrl');
   
-  // Safe decode for single or double percent-encoded URLs
   let resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
   if (resumeUrl && (resumeUrl.includes('%3A') || resumeUrl.includes('%2F'))) {
     resumeUrl = decodeURIComponent(resumeUrl);
@@ -227,7 +225,6 @@
   if (!resumeUrl) {
     card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the link from your email.</div>';
   } else {
-    // Render context block from query params
     const fields = [
       ['Request ID', params.get('request_id')],
       ['Tenant', params.get('tenant_name')],
@@ -240,7 +237,6 @@
       .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
       .join('');
 
-    // Toggle conditional sections + which fields are required based on selected status
     form.addEventListener('change', function (e) {
       if (e.target.name !== 'vendor_status') return;
 
@@ -268,13 +264,15 @@
         return;
       }
 
+      const selectedStatus = document.querySelector('input[name="vendor_status"]:checked')?.value || '';
+
       const payload = {
-        vendor_status: form.vendor_status.value,
-        visit_date: form.visit_date.value || '',
-        visit_time: form.visit_time.value || '',
-        alt_vendor_name: form.alt_vendor_name.value ? form.alt_vendor_name.value.trim() : '',
-        alt_vendor_email: form.alt_vendor_email.value ? form.alt_vendor_email.value.trim() : '',
-        alt_vendor_phone: form.alt_vendor_phone.value ? form.alt_vendor_phone.value.trim() : ''
+        vendor_status: selectedStatus,
+        visit_date: form.visit_date ? form.visit_date.value : '',
+        visit_time: form.visit_time ? form.visit_time.value : '',
+        alt_vendor_name: form.alt_vendor_name ? form.alt_vendor_name.value.trim() : '',
+        alt_vendor_email: form.alt_vendor_email ? form.alt_vendor_email.value.trim() : '',
+        alt_vendor_phone: form.alt_vendor_phone ? form.alt_vendor_phone.value.trim() : ''
       };
 
       submitBtn.disabled = true;
@@ -282,12 +280,18 @@
       statusNote.textContent = "Sending your decision…";
 
       try {
-        await fetch(resumeUrl, {
+        const res = await fetch(resumeUrl, {
           method: "POST",
-          mode: "no-cors",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "text/plain",
+            "ngrok-skip-browser-warning": "true"
+          },
           body: JSON.stringify(payload)
         });
+
+        if (!res.ok && res.status !== 0) {
+          throw new Error("HTTP Error " + res.status);
+        }
 
         card.classList.add('hide-form');
         result.classList.add('show', 'ok');
@@ -295,14 +299,10 @@
         resultTitle.textContent = "Response submitted";
         resultBody.textContent = "Thanks — the workflow will continue automatically based on your decision.";
       } catch (err) {
+        console.error("Submission error:", err);
         submitBtn.disabled = false;
         submitBtn.textContent = "Submit decision";
         statusNote.textContent = "Something went wrong — please try again.";
-        card.classList.add('hide-form');
-        result.classList.add('show', 'err');
-        resultIcon.textContent = "!";
-        resultTitle.textContent = "Couldn't submit your response";
-        resultBody.textContent = "There was a problem reaching the workflow. Please try the link again, or contact the office directly.";
       }
     });
   }
