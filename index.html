@@ -61,6 +61,7 @@
     .details-value {
       color: #091e42;
       text-align: right;
+      font-weight: 500;
     }
     .section-title {
       font-size: 12px;
@@ -105,7 +106,7 @@
       display: none;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       padding: 16px;
       background: #f4f5f7;
       border-radius: 6px;
@@ -282,14 +283,32 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const urlParams = new URLSearchParams(window.location.search);
-      const resumeUrl = urlParams.get('resumeUrl');
 
-      // Populate Request Details from Query Parameters
-      document.getElementById('val-request-id').textContent = urlParams.get('request_id') || '-';
-      document.getElementById('val-tenant').textContent = urlParams.get('tenant_name') || '-';
-      document.getElementById('val-category').textContent = urlParams.get('category') || '-';
-      document.getElementById('val-description').textContent = urlParams.get('description') || '-';
-      document.getElementById('val-vendor').textContent = urlParams.get('suggested_vendor') || '-';
+      // Safe parameter extraction method that handles multiple common key variations
+      function getParam(possibleKeys) {
+        for (const key of possibleKeys) {
+          const val = urlParams.get(key);
+          if (val && val !== 'undefined' && val !== 'null' && val.trim() !== '') {
+            return decodeURIComponent(val);
+          }
+        }
+        return '-';
+      }
+
+      // Populate Request Details without ever rendering "undefined"
+      document.getElementById('val-request-id').textContent = getParam(['request_id', 'id', 'req_id']);
+      document.getElementById('val-tenant').textContent = getParam(['tenant_name', 'tenant', 'name']);
+      document.getElementById('val-category').textContent = getParam(['category', 'cat']);
+      document.getElementById('val-description').textContent = getParam(['description', 'desc', 'issue']);
+      document.getElementById('val-vendor').textContent = getParam(['suggested_vendor', 'vendor']);
+
+      // Get resumeUrl directly
+      const rawSearch = window.location.search;
+      let resumeUrl = urlParams.get('resumeUrl');
+      const match = rawSearch.match(/[?&]resumeUrl=([^&]+.*)/);
+      if (match) {
+        resumeUrl = decodeURIComponent(match[1]);
+      }
 
       const form = document.getElementById('decision-form');
       const submitBtn = document.getElementById('submit-btn');
@@ -313,8 +332,8 @@
       form.addEventListener('submit', function (e) {
         e.preventDefault();
 
-        if (!resumeUrl) {
-          statusNote.textContent = "Error: Invalid or missing execution URL.";
+        if (!resumeUrl || resumeUrl === '-') {
+          statusNote.textContent = "Error: Active execution URL missing in address bar.";
           return;
         }
 
@@ -363,7 +382,9 @@
         setTimeout(function () {
           formContainer.classList.add('hide-form');
           resultBox.classList.add('show');
-          document.body.removeChild(hiddenForm);
+          if (hiddenForm.parentNode) {
+            document.body.removeChild(hiddenForm);
+          }
         }, 400);
       });
     });
