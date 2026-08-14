@@ -185,7 +185,8 @@
 
 <script>
   const params = new URLSearchParams(window.location.search);
-  const resumeUrl = params.get('resumeUrl');
+  let rawResumeUrl = params.get('resumeUrl');
+  let resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
 
   const card = document.getElementById('card');
   const context = document.getElementById('context');
@@ -215,7 +216,7 @@
       .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
       .join('');
 
-    // Toggle conditional sections + which fields are required based on selected status
+    // Toggle conditional sections + required fields
     form.addEventListener('change', function (e) {
       if (e.target.name !== 'vendor_status') return;
 
@@ -257,12 +258,6 @@
       statusNote.textContent = "Sending your decision…";
 
       try {
-        // A real <form> POST submitted into a hidden iframe — not fetch().
-        // CORS only restricts JavaScript from READING a cross-origin response;
-        // it never blocks the browser from SENDING a form submission. Since we
-        // don't need to read n8n's response (only need the Wait node to receive
-        // the POST and resume), this sidesteps CORS entirely — no dependency on
-        // n8n's CORS config, no preflight, works across GitHub Pages + ngrok.
         await submitViaHiddenForm(resumeUrl, payload);
 
         card.classList.add('hide-form');
@@ -283,12 +278,6 @@
     });
   }
 
-  // Submits a plain HTML form (application/x-www-form-urlencoded) into a
-  // hidden iframe, targeting a cross-origin URL. This is never subject to
-  // CORS — CORS only governs script-readable responses (fetch/XHR), not
-  // ordinary form navigations. n8n parses url-encoded POST bodies into
-  // $json.body the same way it parses JSON bodies, so the Code node
-  // downstream (which already reads "body || raw") needs no changes.
   function submitViaHiddenForm(url, data) {
     return new Promise((resolve, reject) => {
       try {
@@ -318,10 +307,6 @@
         document.body.appendChild(hiddenForm);
         hiddenForm.submit();
 
-        // The iframe's response is cross-origin, so the browser won't let us
-        // read it — we resolve optimistically after giving the POST time to
-        // land, since a thrown exception here would only mean something is
-        // wrong with the DOM operation itself, not the cross-origin request.
         setTimeout(() => {
           hiddenForm.remove();
           resolve(true);
