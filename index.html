@@ -47,11 +47,6 @@
   .context .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
   .context .row:last-child { margin-bottom: 0; }
 
-  .dev-warning {
-    background: #fff3cd; color: #856404; border-bottom: 1px solid var(--line);
-    padding: 10px 16px; font-size: 12px; font-family: var(--mono); text-align: center;
-  }
-
   form { padding: 22px 20px 20px; }
   fieldset { border: none; padding: 0; margin: 0 0 20px; }
   legend { font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber-deep); margin-bottom: 12px; }
@@ -96,7 +91,7 @@
 
   .result { display: none; padding: 24px 20px; }
   .result.show { display: block; }
-  .card.hide-form form, .card.hide-form .context, .card.hide-form .dev-warning { display: none; }
+  .card.hide-form form, .card.hide-form .context { display: none; }
   .result-icon {
     width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 20px; margin-bottom: 14px;
@@ -105,6 +100,10 @@
   .result.err .result-icon { background: rgba(184,66,47,0.12); color: var(--error); }
   .result h2 { font-size: 19px; margin: 0 0 8px; }
   .result p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
+  .missing-link {
+    padding: 30px 20px; text-align: center; color: var(--ink-soft); font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -117,10 +116,6 @@
   </div>
 
   <div class="card" id="card">
-    <div id="devWarning" class="dev-warning" style="display: none;">
-      ⚠️ Preview Mode: Open from the n8n email link to test submission.
-    </div>
-    
     <div class="context" id="context"></div>
 
     <form id="reviewForm" novalidate>
@@ -201,9 +196,6 @@
       const separator = resumeUrl.includes('?') ? '&' : '?';
       resumeUrl += `${separator}signature=${params.get('signature')}`;
     }
-  } else {
-    // Show warning banner in preview mode
-    document.getElementById('devWarning').style.display = 'block';
   }
 
   const card = document.getElementById('card');
@@ -218,95 +210,93 @@
   const visitTimeSection = document.getElementById('visitTimeSection');
   const altVendorSection = document.getElementById('altVendorSection');
 
-  // Render context block if URL parameters are available
-  const fields = [
-    ['Request ID', params.get('request_id') || 'REQ-TEST-123'],
-    ['Tenant', params.get('tenant_name') || 'John Doe'],
-    ['Category', params.get('category') || 'Plumbing'],
-    ['Description', params.get('description') || 'Leaking sink in kitchen'],
-    ['Suggested Vendor', params.get('suggested_vendor') || 'Standard Maintenance Services']
-  ];
-  
-  context.innerHTML = fields
-    .filter(([, v]) => v)
-    .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
-    .join('');
+  if (!resumeUrl) {
+    card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the link from your email.</div>';
+  } else {
+    // Render context block
+    const fields = [
+      ['Request ID', params.get('request_id')],
+      ['Tenant', params.get('tenant_name')],
+      ['Category', params.get('category')],
+      ['Description', params.get('description')],
+      ['Suggested Vendor', params.get('suggested_vendor')]
+    ];
+    context.innerHTML = fields
+      .filter(([, v]) => v)
+      .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
+      .join('');
 
-  form.addEventListener('change', function (e) {
-    if (e.target.name !== 'vendor_status') return;
+    form.addEventListener('change', function (e) {
+      if (e.target.name !== 'vendor_status') return;
 
-    document.querySelectorAll('.status-option').forEach(el => el.classList.remove('selected'));
-    e.target.closest('.status-option').classList.add('selected');
+      document.querySelectorAll('.status-option').forEach(el => el.classList.remove('selected'));
+      e.target.closest('.status-option').classList.add('selected');
 
-    const status = e.target.value;
-    const showVisitTime = status === 'Confirmed' || status === 'Need Alternative';
-    const showAltVendor = status === 'Need Alternative';
+      const status = e.target.value;
+      const showVisitTime = status === 'Confirmed' || status === 'Need Alternative';
+      const showAltVendor = status === 'Need Alternative';
 
-    visitTimeSection.classList.toggle('show', showVisitTime);
-    altVendorSection.classList.toggle('show', showAltVendor);
+      visitTimeSection.classList.toggle('show', showVisitTime);
+      altVendorSection.classList.toggle('show', showAltVendor);
 
-    document.getElementById('visit_date').required = showVisitTime;
-    document.getElementById('visit_time').required = showVisitTime;
-    document.getElementById('alt_vendor_name').required = showAltVendor;
-    document.getElementById('alt_vendor_email').required = showAltVendor;
-    document.getElementById('alt_vendor_phone').required = showAltVendor;
-  });
+      document.getElementById('visit_date').required = showVisitTime;
+      document.getElementById('visit_time').required = showVisitTime;
+      document.getElementById('alt_vendor_name').required = showAltVendor;
+      document.getElementById('alt_vendor_email').required = showAltVendor;
+      document.getElementById('alt_vendor_phone').required = showAltVendor;
+    });
 
-  form.addEventListener('submit', async function (e) {
-    e.preventDefault();
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    if (!resumeUrl) {
-      alert("Missing n8n resumeUrl! Please open this page using the link generated in your email.");
-      return;
-    }
-
-    const payload = {
-      vendor_status: form.vendor_status.value,
-      visit_date: form.visit_date.value || '',
-      visit_time: form.visit_time.value || '',
-      alt_vendor_name: form.alt_vendor_name.value.trim(),
-      alt_vendor_email: form.alt_vendor_email.value.trim(),
-      alt_vendor_phone: form.alt_vendor_phone.value.trim()
-    };
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting…";
-    statusNote.textContent = "Sending your decision…";
-
-    try {
-      const response = await fetch(resumeUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
       }
 
-      card.classList.add('hide-form');
-      result.classList.add('show', 'ok');
-      resultIcon.textContent = "✓";
-      resultTitle.textContent = "Response submitted";
-      resultBody.textContent = "Thanks — your decision has been sent and the workflow will continue automatically.";
-    } catch (err) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit decision";
-      statusNote.textContent = "Something went wrong — please try again.";
-      card.classList.add('hide-form');
-      result.classList.add('show', 'err');
-      resultIcon.textContent = "!";
-      resultTitle.textContent = "Couldn't reach the system";
-      resultBody.textContent = "There was a network problem submitting your response. Please check your connection and try the link again.";
-    }
-  });
+      const payload = {
+        vendor_status: form.vendor_status.value,
+        visit_date: form.visit_date.value || '',
+        visit_time: form.visit_time.value || '',
+        alt_vendor_name: form.alt_vendor_name.value.trim(),
+        alt_vendor_email: form.alt_vendor_email.value.trim(),
+        alt_vendor_phone: form.alt_vendor_phone.value.trim()
+      };
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting…";
+      statusNote.textContent = "Sending your decision…";
+
+      try {
+        const response = await fetch(resumeUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        card.classList.add('hide-form');
+        result.classList.add('show', 'ok');
+        resultIcon.textContent = "✓";
+        resultTitle.textContent = "Response submitted";
+        resultBody.textContent = "Thanks — your decision has been sent and the workflow will continue automatically.";
+      } catch (err) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit decision";
+        statusNote.textContent = "Something went wrong — please try again.";
+        card.classList.add('hide-form');
+        result.classList.add('show', 'err');
+        resultIcon.textContent = "!";
+        resultTitle.textContent = "Couldn't reach the system";
+        resultBody.textContent = "There was a network problem submitting your response. Please check your connection and try the link again.";
+      }
+    });
+  }
 </script>
 
 </body>
