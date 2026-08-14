@@ -186,7 +186,21 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   let rawResumeUrl = params.get('resumeUrl');
-  let resumeUrl = rawResumeUrl ? decodeURIComponent(rawResumeUrl) : null;
+  let resumeUrl = null;
+
+  if (rawResumeUrl) {
+    resumeUrl = decodeURIComponent(rawResumeUrl);
+    
+    // Re-attach signature if browser stripped it into a separate query param
+    if (!resumeUrl.includes('signature=') && params.get('signature')) {
+      const separator = resumeUrl.includes('?') ? '&' : '?';
+      resumeUrl += `${separator}signature=${params.get('signature')}`;
+    }
+
+    // Bypass ngrok free tier browser warning screen
+    const ngrokBypass = resumeUrl.includes('?') ? '&ngrok-skip-browser-warning=true' : '?ngrok-skip-browser-warning=true';
+    resumeUrl += ngrokBypass;
+  }
 
   const card = document.getElementById('card');
   const context = document.getElementById('context');
@@ -203,7 +217,7 @@
   if (!resumeUrl) {
     card.innerHTML = '<div class="missing-link">This link is missing required information. Please use the link from your email.</div>';
   } else {
-    // Render context block from query params
+    // Render context block
     const fields = [
       ['Request ID', params.get('request_id')],
       ['Tenant', params.get('tenant_name')],
@@ -216,7 +230,6 @@
       .map(([label, v]) => `<div class="row"><span>${label}</span><strong>${v}</strong></div>`)
       .join('');
 
-    // Toggle conditional sections + required fields
     form.addEventListener('change', function (e) {
       if (e.target.name !== 'vendor_status') return;
 
@@ -310,7 +323,7 @@
         setTimeout(() => {
           hiddenForm.remove();
           resolve(true);
-        }, 900);
+        }, 1000);
       } catch (err) {
         reject(err);
       }
